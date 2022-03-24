@@ -25,6 +25,7 @@ app.get("/", (_req, res) => {
   res.send("Students");
 });
 
+// GET all students
 app.get("/students", async (_req, res) => {
   let students;
   try {
@@ -38,17 +39,60 @@ app.get("/students", async (_req, res) => {
   res.json(students);
 });
 
+// CREATE student
 app.post("/students", async (req, res) => {
-  let students;
+  let student;
   try {
-    students = await Students.create(req.body);
+    student = await Students.create(req.body);
   } catch (err) {
     return res.status(400).json({
       message: "ERROR: Bad data received",
     });
   }
   res.json({
-    message: `Student ${req.body.name} added to the database`,
+    message: `Student ${req.body.name} has been ADDED to the database`,
+  });
+});
+
+// GET student by name
+app.get("/students/:name", async (req, res) => {
+  let student;
+  try {
+    student = await Students.findOne(
+      {
+        name:
+          req.params.name.charAt(0).toUpperCase() + req.params.name.slice(1),
+      },
+      "-__v"
+    );
+  } catch (err) {
+    return res.status(404).json({
+      message: `${err}`,
+    });
+  }
+  if (student === null) {
+    return res.status(400).json({
+      message: "This student CANNOT be found in the database.",
+    });
+  }
+  res.json(student);
+});
+
+// DELETE one student
+app.delete("/students/:name", async (req, res) => {
+  let student;
+  try {
+    student = await Students.findOneAndDelete({
+      name: req.params.name.charAt(0).toUpperCase() + req.params.name.slice(1),
+    });
+  } catch (err) {
+    return res.status(400).json({
+      message: "ERROR: Bad data received",
+    });
+  }
+
+  res.json({
+    message: `Student ${req.params.name} has been DELETED from the database`,
   });
 });
 
