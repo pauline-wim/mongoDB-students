@@ -1,32 +1,23 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { Pool } = require("pg");
+const Students = require("./models/studentsModel");
 const app = express();
 const PORT = 8000;
-const Postgres = new Pool({ ssl: { rejectUnauthorized: false } });
 
 dotenv.config({
   path: "./config.env",
 });
 
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+  })
+  .then(() => console.log("Database mongoDB running"));
+
 app.use(express.json());
 app.use(cors());
-
-// const students = [
-//   {
-//     id: 1,
-//     name: "Paul",
-//   },
-//   {
-//     id: 2,
-//     name: "Bob",
-//   },
-//   {
-//     id: 3,
-//     name: "Michael",
-//   },
-// ];
 
 // ROUTES
 
@@ -37,40 +28,28 @@ app.get("/", (_req, res) => {
 app.get("/students", async (_req, res) => {
   let students;
   try {
-    students = await Postgres.query("SELECT * FROM students");
+    students = await Students.find().select("-__v");
   } catch (err) {
     console.log(err);
-
     return res.status(400).json({
-      message: "An error happened",
+      message: `Error occured: ${err}`,
     });
   }
-
-  res.json(students.rows);
-  // res.json(students);
+  res.json(students);
 });
 
 app.post("/students", async (req, res) => {
+  let students;
   try {
-    await Postgres.query("INSERT INTO students(name, city) VALUES($1, $2)", [
-      req.body.name,
-      req.body.city,
-    ]);
+    students = await Students.create(req.body);
   } catch (err) {
     return res.status(400).json({
       message: "ERROR: Bad data received",
     });
   }
-
   res.json({
     message: `Student ${req.body.name} added to the database`,
   });
-  // console.log(req.body);
-  // students.push({
-  //   id: students.length + 1,
-  //   name: req.body.name,
-  // });
-  // res.send(students);
 });
 
 // ERROR
