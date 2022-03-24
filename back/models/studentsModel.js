@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
-  name: {
+  firstName: {
     type: String,
     required: true,
   },
-  city: String,
+  lastName: {
+    type: String,
+    required: true,
+  },
 });
 
 // créer un modèle
