@@ -31,18 +31,34 @@ export default function Form() {
     });
   };
 
+  const onDelete = (data) => {
+    studentsContext.setStudents((prev) => {
+      return prev.filter((student) => {
+        return student.name !== data.userEntry;
+      });
+    });
+
+    fetch(`http://localhost:8000/students/${data.userEntry}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* {console.log(studentsContext.names)} */}
       <label>
         Name:
         <input type="text" {...register("userEntry", { required: true })} />
+        {errors.userEntry && <span>Please enter a student name</span>}
       </label>
       <label>
         City:
-        <input type="text" {...register("cityEntry", { required: true })} />
+        <input type="text" {...register("cityEntry", { required: false })} />
       </label>
       <input type="submit" value="Save" />
+      <input type="button" value="Delete" onClick={handleSubmit(onDelete)} />
     </form>
   );
 }
