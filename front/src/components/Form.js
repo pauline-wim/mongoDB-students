@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useState, useContext } from "react";
+import { useContext } from "react";
 // Context
 import { StudentsContext } from "../App";
 
@@ -18,8 +18,8 @@ export default function Form() {
       ...prev,
       {
         id: studentsContext.students.length + 1,
-        name: data.userEntry,
-        city: data.cityEntry,
+        firstName: data.firstNameEntry,
+        lastName: data.lastNameEntry,
       },
     ]);
     fetch("http://localhost:8000/students", {
@@ -27,18 +27,21 @@ export default function Form() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: data.userEntry, city: data.cityEntry }),
+      body: JSON.stringify({
+        firstName: data.firstNameEntry,
+        lastName: data.lastNameEntry,
+      }),
     });
   };
 
   const onDelete = (data) => {
     studentsContext.setStudents((prev) => {
       return prev.filter((student) => {
-        return student.name !== data.userEntry;
+        return student.firstName !== data.firstNameEntry;
       });
     });
 
-    fetch(`http://localhost:8000/students/${data.userEntry}`, {
+    fetch(`http://localhost:8000/students/${data.firstNameEntry}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -49,14 +52,22 @@ export default function Form() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <label>
-        Name:
-        <input type="text" {...register("userEntry", { required: true })} />
-        {errors.userEntry && <span>Please enter a student name</span>}
+        First Name:
+        <input
+          type="text"
+          {...register("firstNameEntry", { required: true })}
+        />
+        {errors.firstNameEntry && (
+          <span>Please enter the student first name</span>
+        )}
       </label>
+      <br />
       <label>
-        City:
-        <input type="text" {...register("cityEntry", { required: false })} />
+        Last Name:
+        <input type="text" {...register("lastNameEntry", { required: true })} />
+        {errors.lastNameEntry && <span>The student last name is required</span>}
       </label>
+      <br />
       <input type="submit" value="Save" />
       <input type="button" value="Delete" onClick={handleSubmit(onDelete)} />
     </form>
